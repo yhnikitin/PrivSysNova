@@ -1,0 +1,17 @@
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/DataSafe.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/Anonymizable.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/AnonymousHealthData.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/Appointment.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/ConsentRecord.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/Employee.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/GdprRequest.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/HealthData.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/KAnonymityTool.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/Patient.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/entities/Payment.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/gdpr/GDPRHandler.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/storage/Hibernate.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/util/ConfigLoader.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/util/ExportEntity.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/util/Exportable.java
+/Users/yehor/Downloads/proj1/src/main/java/pt/unl/fct/di/syspriv/xacml/XACMLPDP.java

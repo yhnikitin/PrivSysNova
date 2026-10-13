@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pdp xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns="http://authzforce.github.io/core/xmlns/pdp/8"
+     version="8.1">
+    
+    <policyProvider id="myPolicyProvider"
+                        xsi:type="StaticPolicyProvider">
+    <policyLocation>classpath:ci_policy.xml</policyLocation>
+    </policyProvider>
+</pdp>

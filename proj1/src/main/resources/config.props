@@ -1,0 +1,4 @@
+# Systems Privacy Labs and Projects - Configuration File
+
+# XACML (Lab 1)
+xacml.policy.file=ci_policies.xml
