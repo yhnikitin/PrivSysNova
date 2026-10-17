@@ -103,7 +103,8 @@ public class DataSafe {
         if (loggedInPerson instanceof Employee emp) {
             System.out.println("Welcome, " + emp.getName() + " (" + emp.getRole() + ")!");
         } else if (loggedInPerson instanceof Patient pat) {
-            System.out.println("Welcome, " + pat.getName() + "!");
+            System.out.println("Welcome, " + pat.getName() + "! (ID " + pat.getId() + ")"); //TEST
+            //System.out.println("Welcome, " + pat.getName() + "!");
         } else {
             System.out.println("Welcome!");
         }
@@ -135,13 +136,16 @@ public class DataSafe {
         }
 
         Long id = null;
-        if (tableChoice != 5) {
+        if (tableChoice == 1 || tableChoice == 2) {
+            id = handleAccessIdOrName(tableChoice, scanner);
+        } else if (tableChoice != 5) {
             id = promptId(scanner);
-            if (id == null) {
-                System.out.println("Invalid ID. Please try again.");
-                return;
-            }
         }
+        if (id == null && tableChoice != 5) {
+            System.out.println("Invalid ID or name. Please try again.");
+            return;
+        }
+
 
         String lawfulBasis = promptLawfulBasis(scanner);
         if (lawfulBasis == null) {
@@ -150,6 +154,26 @@ public class DataSafe {
         }
 
         handleDataAccess(context, tableChoice, id, lawfulBasis, scanner);
+    }
+
+    private Long handleAccessIdOrName(int tablechoice, Scanner scanner) {
+        System.out.println("\n=== How would you like to access? ===");
+        System.out.println("1. Access by name\n2. Access by ID");
+        System.out.print("Select an option: ");
+
+        String input = scanner.nextLine();
+
+        Long ID = null;
+        switch(input){
+            case "1" -> ID = promptName(tablechoice, scanner);
+            case "2" -> ID = promptId(scanner);
+        }
+
+        try {
+            return ID;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private void handleGdprRequestMenu(Scanner scanner) {
@@ -259,6 +283,23 @@ public class DataSafe {
         }
     }
 
+    private Long promptName(int tableChoice, Scanner scanner) {
+        System.out.print("Please enter the name of the person you'd like to access: ");
+        String name = scanner.nextLine().trim();
+
+        if (tableChoice == 1) {
+            for (Employee e : hibernate.jpql("FROM Employee", Employee.class)) {
+                if (e.getName().equalsIgnoreCase(name)) return e.getId();
+            }
+        } else if (tableChoice == 2) {
+            for (Patient p : hibernate.jpql("FROM Patient", Patient.class)) {
+                if (p.getName().equalsIgnoreCase(name)) return p.getId();
+            }
+        }
+        return null;
+    }
+
+
     private void handleDataAccess(String context, int tableChoice, Long id, String lawfulBasis, Scanner scanner) {
         Class<?> entityClass;
         String entityName;
@@ -303,6 +344,7 @@ public class DataSafe {
 
             if (allowed) {
                 System.out.println("Access Granted!");
+                System.out.println(result); //Added to sho result on the prompt
             } else {
                 System.out.println("Access Denied: You do not have permission to view "
                                 + entityName + " data.");

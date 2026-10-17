@@ -4,6 +4,7 @@
            Version="1.0"
            PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable">
     <Target />
+    <!-- FOR TESTING
     <PolicySet PolicySetId="GDPRPolicySet"
                Version="1.0"
                PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable">
@@ -202,9 +203,9 @@
             </Rule>
         </Policy>
     </PolicySet>
+-->
 
     <!-- Hospital access policies -->
-
     <PolicySet xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
             PolicySetId="HospitalPolicySet"
             Version="1.0"
@@ -437,7 +438,7 @@
                                                 AttributeId="context" DataType="http://www.w3.org/2001/XMLSchema#string"
                                                 MustBePresent="false"/>
                                 <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
-                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">BillingAndPayment</AttributeValue>
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Billing and Payments</AttributeValue>
                                 </Apply>
                             </Apply>
                     </Apply>
@@ -453,7 +454,6 @@
                 needed here, since the AnyOf and AllOf tags already handle this logic.
             </Description>
             <Target>
-                <!-- TODO: Fill me in. // -->
                 <AnyOf>
                     <AllOf>
                         <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
@@ -480,23 +480,33 @@
                     is patient data.
                 </Description>
                 <Condition>
-                    <!-- TODO: Fill me in. -->
                     <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+                        <!-- 1. Not an emergency -->
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not">
+                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-is-in">
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Emergency</AttributeValue>
+                                <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
+                                                     AttributeId="context" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                     MustBePresent="false"/>
+                            </Apply>
+                        </Apply>
+                        <!-- 2. The subject is the patient's doctor -->
                         <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-set-equals">
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                MustBePresent="false"/>
+                                                 AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-                                                AttributeId="doctorId" DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                MustBePresent="false"/>
+                                                 AttributeId="doctorId" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
                         </Apply>
-
+                        <!-- 3. PatientData or AppointmentData -->
                         <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-subset">
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-                                            AttributeId="resource-type" DataType="http://www.w3.org/2001/XMLSchema#string"
-                                            MustBePresent="false"/>
+                                                 AttributeId="resource-type" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
                             <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
                                 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">PatientData</AttributeValue>
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">AppointmentData</AttributeValue>
                             </Apply>
                         </Apply>
                     </Apply>
@@ -513,7 +523,6 @@
                 Emergency.
             </Description>
             <Target>
-                <!-- TODO: Fill me in. // ?? -->
                 <AnyOf>
                     <AllOf>
                         <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">

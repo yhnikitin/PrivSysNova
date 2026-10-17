@@ -63,7 +63,7 @@ public class XACMLPDP {
         Map<String, String> actionAttrs = new HashMap<>();
         Map<String, String> envAttrs = new HashMap<>();
 
-        // TODO: Place the attributes from the XML into the appropriate HashMap.
+        // Subject
          if (requester instanceof Employee employee) {
             subjectAttrs.put("role", employee.getRole());
             subjectAttrs.put("id", String.valueOf(employee.getId()));
@@ -72,15 +72,16 @@ public class XACMLPDP {
             subjectAttrs.put("id", String.valueOf(patient.getId()));
         }
 
+         //Resource
         if (resource instanceof Employee employee) {
             resourceAttrs.put("id", String.valueOf(employee.getId()));
             resourceAttrs.put("resource-type", "EmployeeData");
         } else if (resource instanceof Patient patient) {
             resourceAttrs.put("id", String.valueOf(patient.getId()));
             resourceAttrs.put("resource-type", "PatientData");
-            if (patient.getPrimaryDoctor() != null) {
-                resourceAttrs.put("doctorId", String.valueOf(patient.getPrimaryDoctor().getId()));
-            }
+            //if (patient.getPrimaryDoctor() != null) { all patients have primary doc
+            resourceAttrs.put("doctorId", String.valueOf(patient.getPrimaryDoctor().getId()));
+            //}
         } else if (resource instanceof Appointment appointment) {
             resourceAttrs.put("id", String.valueOf(appointment.getId()));
             resourceAttrs.put("resource-type", "AppointmentData");
@@ -89,6 +90,7 @@ public class XACMLPDP {
             resourceAttrs.put("resource-type", "PaymentData");
         }
 
+        //Context
         if (context != null && !context.isBlank()) {
             envAttrs.put("context", context);
         }
@@ -180,6 +182,7 @@ public class XACMLPDP {
         var request = requestBuilder.build(true);
         logger.debug(request.toString());
         DecisionResult result = pdp.evaluate(request);
+
         logger.debug(result.toString());
         return result.getDecision() == DecisionType.PERMIT;
     }
