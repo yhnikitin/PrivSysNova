@@ -7,22 +7,21 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gdpr_requests")
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GdprRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "employee_subject_id")
-    @JsonIgnore
+    //@JsonIgnore
     private Employee employeeSubject;
 
     @ManyToOne
     @JoinColumn(name = "patient_subject_id")
-    @JsonIgnore
+    //@JsonIgnore
     private Patient patientSubject;
 
     @Column(name = "subject_type", nullable = false, length = 20)
@@ -40,12 +39,12 @@ public class GdprRequest {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @Column(length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'PENDING'")
+    @Column(length = 20)
     private String status = "PENDING";
 
     @ManyToOne
     @JoinColumn(name = "handled_by")
-    @JsonIgnore
+    //@JsonIgnore
     private Employee handledBy;
 
     @Transient

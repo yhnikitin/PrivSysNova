@@ -4,7 +4,6 @@
            Version="1.0"
            PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable">
     <Target />
-    <!-- FOR TESTING
     <PolicySet PolicySetId="GDPRPolicySet"
                Version="1.0"
                PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable">
@@ -24,7 +23,7 @@
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
                                                  AttributeId="action-id"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="true"/>
+                                                 MustBePresent="false"/>
                         </Match>
                     </AllOf>
                 </AnyOf>
@@ -67,7 +66,7 @@
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
                                                  AttributeId="erasure-requested"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="true"/>
+                                                 MustBePresent="false"/>
                         </Match>
                     </AllOf>
                 </AnyOf>
@@ -99,7 +98,7 @@
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
                                                  AttributeId="retention-expired"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="true"/>
+                                                 MustBePresent="false"/>
                         </Match>
                     </AllOf>
                 </AnyOf>
@@ -142,7 +141,7 @@
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
                                                  AttributeId="data-category"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="true"/>
+                                                 MustBePresent="false"/>
                         </Match>
                     </AllOf>
                 </AnyOf>
@@ -174,7 +173,7 @@
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
                                                  AttributeId="action-id"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="true"/>
+                                                 MustBePresent="false"/>
                         </Match>
                     </AllOf>
                 </AnyOf>
@@ -203,7 +202,6 @@
             </Rule>
         </Policy>
     </PolicySet>
--->
 
     <!-- Hospital access policies -->
     <PolicySet xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"

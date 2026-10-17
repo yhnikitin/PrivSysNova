@@ -7,6 +7,7 @@ import pt.unl.fct.di.syspriv.xacml.XACMLPDP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
@@ -372,7 +373,7 @@ public class DataSafe {
                 
                 if (allowed) {
                     Patient patient = (Patient) hibernate.get(Patient.class, hd.getPatientId());
-                    dataToAnonymize.add(new AnonymousHealthData(hd.getId(), patient.getBirthdate().getYear(), patient.getAddress(), hd.getGlucoseLevel(), hd.getMeasurementDate()));
+                    dataToAnonymize.add(new AnonymousHealthData(hd.getId(), LocalDate.parse(patient.getBirthdate().substring(0, 10)).getYear(), patient.getAddress(), hd.getGlucoseLevel(), hd.getMeasurementDate()));
                 }
             }
 

@@ -1,28 +1,25 @@
 package pt.unl.fct.di.syspriv.entities;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "consent_records")
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//CHECK @JsonInclude(JsonInclude.Include.NON_NULL) don't know if needed
 public class ConsentRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "employee_subject_id")
-    @JsonIgnore
+    //@JsonIgnore
     private Employee employeeSubject;
 
     @ManyToOne
     @JoinColumn(name = "patient_subject_id")
-    @JsonIgnore
+    //@JsonIgnore
     private Patient patientSubject;
 
     @Column(name = "subject_type", nullable = false, length = 20)

@@ -25,27 +25,36 @@ public class Employee {
     @Column(nullable = false)
     private Boolean isAdmin;
 
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "retention_until")
     private LocalDateTime retentionUntil;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    //@JsonIgnore
     private List<Appointment> appointments;
     
     @OneToMany(mappedBy = "primaryDoctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    //@JsonIgnore
     private List<Patient> patients;
 
     @OneToMany(mappedBy = "employeeSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    //@JsonIgnore
     private List<ConsentRecord> consentRecords = new ArrayList<>();
 
     @OneToMany(mappedBy = "employeeSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    //@JsonIgnore
     private List<GdprRequest> gdprRequests = new ArrayList<>();
+
+    @Column(name = "erasure_requested", columnDefinition = "boolean default 0")
+    private Boolean erasureRequested = false;
+
+    @Column(name = "erasure_completed_at")
+    private LocalDateTime erasureCompletedAt;
 
     public Employee() {}
 

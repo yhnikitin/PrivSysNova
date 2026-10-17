@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "patients")
 public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,7 +19,7 @@ public class Patient {
     private String name;
 
     @Column(name = "birthdate", nullable = false)
-    private Date birthdate;
+    private String birthdate;
 
     @Column(length = 50)
     private String insurance;
@@ -26,10 +27,13 @@ public class Patient {
     @Column(length = 200)
     private String address;
 
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "retention_until")
     private LocalDateTime retentionUntil;
 
     @ManyToOne
@@ -38,20 +42,26 @@ public class Patient {
     private Employee primaryDoctor;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    //@JsonIgnore
     private List<Appointment> appointments = new ArrayList<>();
 
     @OneToMany(mappedBy = "patientSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    //@JsonIgnore
     private List<ConsentRecord> consentRecords = new ArrayList<>();
 
     @OneToMany(mappedBy = "patientSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    //@JsonIgnore
     private List<GdprRequest> gdprRequests = new ArrayList<>();
+
+    @Column(name = "erasure_requested", columnDefinition = "boolean default 0")
+    private Boolean erasureRequested = false;
+
+    @Column(name = "erasure_completed_at")
+    private LocalDateTime erasureCompletedAt;
 
     public Patient() {}
 
-    public Patient(String name, Date birthdate, String insurance, String address, Employee primaryDoctorId) {
+    public Patient(String name, String birthdate, String insurance, String address, Employee primaryDoctorId) {
         this.name = name;
         this.birthdate = birthdate;
         this.insurance = insurance;
@@ -77,8 +87,8 @@ public class Patient {
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    public Date getBirthdate() { return birthdate; }
-    public void setBirthdate(Date birthdate) { this.birthdate = birthdate; }
+    public String getBirthdate() { return birthdate; }
+    public void setBirthdate(String birthdate) { this.birthdate = birthdate; }
     public String getInsurance() { return insurance; }
     public void setInsurance(String insurance) { this.insurance = insurance; }
     public String getAddress() { return address; }
@@ -97,6 +107,8 @@ public class Patient {
     public void setConsentRecords(List<ConsentRecord> consentRecords) { this.consentRecords = consentRecords; }
     public List<GdprRequest> getGdprRequests() { return gdprRequests; }
     public void setGdprRequests(List<GdprRequest> gdprRequests) { this.gdprRequests = gdprRequests; }
+    public Boolean getErasureRequested () { return erasureRequested;}
+    public void setErasureRequested(Boolean erasureRequested){ this.erasureRequested =erasureRequested;}
 
     // For debugging and logging purposes.
     @Override
