@@ -1,6 +1,7 @@
 package pt.unl.fct.di.syspriv.xacml;
 
-import pt.unl.fct.di.syspriv.util.ConfigLoader;
+
+import pt.unl.fct.di.syspriv.DataSafe;
 import pt.unl.fct.di.syspriv.entities.*;
 import pt.unl.fct.di.syspriv.storage.Hibernate;
 
@@ -8,24 +9,17 @@ import org.ow2.authzforce.core.pdp.api.*;
 import org.ow2.authzforce.core.pdp.api.value.*;
 import org.ow2.authzforce.core.pdp.impl.BasePdpEngine;
 import org.ow2.authzforce.core.pdp.impl.PdpEngineConfiguration;
-import org.ow2.authzforce.xacml.identifiers.XacmlStatusCode;
 
 import oasis.names.tc.xacml._3_0.core.schema.wd_17.DecisionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.logging.log4j.Level;
 
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.time.LocalDateTime;
-import org.apache.commons.io.IOUtils;
 
 public class XACMLPDP {
 
@@ -36,12 +30,12 @@ public class XACMLPDP {
     private static final String ENV_CATEGORY = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment";
 
     private final BasePdpEngine pdp;
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(BasePdpEngine.class);
 
     public XACMLPDP() throws Exception {
         PdpEngineConfiguration config = PdpEngineConfiguration.getInstance(XACMLPDP.class.getClassLoader().getResource("pdp.xml").getPath());
         this.pdp = new BasePdpEngine(config);
-        this.logger = LoggerFactory.getLogger(BasePdpEngine.class);
+        logger.info("BasePdpEngine (XACML) instance initialized.");
     }
 
     private String loadPolicyXml(String policyFile) throws Exception {
@@ -128,7 +122,7 @@ public class XACMLPDP {
         Map<String, String> actionAttrs = new HashMap<>();
         Map<String, String> envAttrs = new HashMap<>();
 
-        List<ConsentRecord> consents = findConsentRecords(requester);
+        /*List<ConsentRecord> consents = findConsentRecords(requester);
         List<GdprRequest> requests = findGdprRequests(requester);
         ConsentRecord marketingConsent = latestConsent(consents, "marketing");
         List<ConsentRecord> researchConsents = consents;
@@ -143,6 +137,13 @@ public class XACMLPDP {
                 ConsentRecord.class);
         }
         ConsentRecord researchConsent = latestConsent(researchConsents, "research");
+    */
+
+        Object owner = getOwner(resource);
+        List<ConsentRecord> consents = owner == null ? List.of() : findConsentRecords(owner);
+        List<GdprRequest> requests = owner == null ? List.of() : findGdprRequests(owner);
+        ConsentRecord marketingConsent = latestConsent(consents, "marketing");
+        ConsentRecord researchConsent = latestConsent(consents, "research");
 
         if (requester instanceof Employee employee) {
             subjectAttrs.put("role", employee.getRole());
@@ -167,12 +168,12 @@ public class XACMLPDP {
         resourceAttrs.put("data-category", isHealthData(resource) ? "health-data" : "personal-data");
         subjectAttrs.put("retention-expired", Boolean.toString(isRetentionExpired(resource)));
 
-        if (resource instanceof ConsentRecord c) {
-            Long owner = c.getPatientSubject() != null ? c.getPatientSubject().getId() : c.getEmployeeSubject().getId();
-            resourceAttrs.put("owner-id", String.valueOf(owner));
-        } else if (resource instanceof GdprRequest r) {
-            Long owner = r.getPatientSubject() != null ? r.getPatientSubject().getId() : r.getEmployeeSubject().getId();
-            resourceAttrs.put("owner-id", String.valueOf(owner));
+        if (resource instanceof Patient p && p.getPrimaryDoctor() != null) {
+            resourceAttrs.put("doctorId", String.valueOf(p.getPrimaryDoctor().getId()));
+        }
+
+        if ((resource instanceof ConsentRecord || resource instanceof GdprRequest ) && owner != null) {
+            resourceAttrs.put("owner-id", String.valueOf(getSubjectId(owner)));
         }
 
         actionAttrs.put("action-id", action);
@@ -305,5 +306,19 @@ public class XACMLPDP {
             );
             requestBuilder.putNamedAttributeIfAbsent(fqn, bag);
         }
+    }
+
+    // ---- AUX
+    private Object getOwner(Object resource) {
+        if (resource instanceof Employee || resource instanceof Patient) return resource;
+        if (resource instanceof Appointment a) return a.getPatient();
+        if (resource instanceof Payment p) return p.getPatient();
+        if (resource instanceof HealthData h)
+            return Hibernate.getInstance().get(Patient.class, h.getPatientId());
+        if (resource instanceof ConsentRecord c)
+            return c.getPatientSubject() != null ? c.getPatientSubject() : c.getEmployeeSubject();
+        if (resource instanceof GdprRequest r)
+            return r.getPatientSubject() != null ? r.getPatientSubject() : r.getEmployeeSubject();
+        return null;
     }
 }

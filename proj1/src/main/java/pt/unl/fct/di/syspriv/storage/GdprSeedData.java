@@ -12,7 +12,8 @@ public class GdprSeedData {
 
     public static void main(String[] args) {
         //seed();
-        reseed();
+        //reseed();
+        seedStaff();
     }
 
     public static void reseed() {
@@ -73,5 +74,20 @@ public class GdprSeedData {
 
     private static Patient newPatient(String name, String address, Employee doctor) {
         return new Patient(name, "1990-01-01 00:00:00", "TestInsurance", address, doctor);
+    }
+
+    public static void seedStaff() {
+        Hibernate db = Hibernate.getInstance();
+
+        var existing = db.jpql("from Employee e where e.name like 'GDPR Test%'", Employee.class);
+        if (!existing.isEmpty()) {
+            System.out.println("Staff de teste já existe, nada a fazer.");
+            return;
+        }
+
+        Employee dpo = new Employee("GDPR Test DPO", "DPO", "Compliance", false);
+        Employee auditor = new Employee("GDPR Test Auditor", "Auditor", "Compliance", false);
+        db.persist(dpo, auditor);
+        System.out.println("Staff de teste inserido.");
     }
 }
