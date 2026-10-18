@@ -35,19 +35,19 @@ public class Employee {
     private LocalDateTime retentionUntil;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    //@JsonIgnore
+    @JsonIgnore
     private List<Appointment> appointments;
     
     @OneToMany(mappedBy = "primaryDoctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    //@JsonIgnore
+    @JsonIgnore
     private List<Patient> patients;
 
     @OneToMany(mappedBy = "employeeSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonIgnore
+    @JsonIgnore
     private List<ConsentRecord> consentRecords = new ArrayList<>();
 
     @OneToMany(mappedBy = "employeeSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonIgnore
+    @JsonIgnore
     private List<GdprRequest> gdprRequests = new ArrayList<>();
 
     @Column(name = "erasure_requested", columnDefinition = "boolean default 0")
@@ -103,6 +103,11 @@ public class Employee {
     public void setConsentRecords(List<ConsentRecord> consentRecords) { this.consentRecords = consentRecords; }
     public List<GdprRequest> getGdprRequests() { return gdprRequests; }
     public void setGdprRequests(List<GdprRequest> gdprRequests) { this.gdprRequests = gdprRequests; }
+
+    public Boolean getErasureRequested() {return erasureRequested;}
+    public void setErasureRequested(Boolean erasureRequested) {this.erasureRequested = erasureRequested;}
+    public LocalDateTime getErasureCompletedAt() {return erasureCompletedAt;}
+    public void setErasureCompletedAt(LocalDateTime erasureCompletedAt) {this.erasureCompletedAt = erasureCompletedAt;}
 
     // For debugging and logging purposes.
     @Override

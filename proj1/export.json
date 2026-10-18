@@ -1,0 +1,51 @@
+{
+  "patient" : {
+    "row" : {
+      "id" : 1026,
+      "name" : "GDPR Test Marketing",
+      "birthdate" : "1990-01-01 00:00:00",
+      "insurance" : "TestInsurance",
+      "address" : "Rua A, Lisboa",
+      "createdAt" : "2026-10-17T23:11:18.159",
+      "updatedAt" : "2026-10-17T23:11:18.159",
+      "erasureRequested" : false,
+      "stringId" : "1026"
+    }
+  },
+  "appointments" : [ ],
+  "payments" : [ ],
+  "consentRecords" : [ {
+    "id" : 1,
+    "subjectType" : "PATIENT",
+    "purpose" : "marketing",
+    "granted" : true,
+    "grantedAt" : "2026-10-07T23:11:18.156",
+    "policyVersion" : "v1",
+    "source" : "web"
+  } ],
+  "gdprRequests" : [ {
+    "id" : 12,
+    "subjectType" : "PATIENT",
+    "requestType" : "ACCESS",
+    "lawfulBasis" : "contract",
+    "requestedAt" : "2026-10-18T19:20:13.629",
+    "completedAt" : "2026-10-18T19:20:13.691",
+    "status" : "COMPLETED"
+  }, {
+    "id" : 13,
+    "subjectType" : "PATIENT",
+    "requestType" : "ACCESS",
+    "lawfulBasis" : "legal-obligation",
+    "requestedAt" : "2026-10-18T19:24:25.137",
+    "completedAt" : "2026-10-18T19:24:25.195",
+    "status" : "COMPLETED"
+  }, {
+    "id" : 14,
+    "subjectType" : "PATIENT",
+    "requestType" : "ACCESS",
+    "lawfulBasis" : "legal-obligation",
+    "requestedAt" : "2026-10-18T19:38:31.698",
+    "completedAt" : "2026-10-18T19:38:31.751",
+    "status" : "COMPLETED"
+  } ]
+}

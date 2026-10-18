@@ -165,6 +165,14 @@ public class XACMLPDP {
         resourceAttrs.put("data-category", isHealthData(resource) ? "health-data" : "personal-data");
         subjectAttrs.put("retention-expired", Boolean.toString(isRetentionExpired(resource)));
 
+        if (resource instanceof ConsentRecord c) {
+            Long owner = c.getPatientSubject() != null ? c.getPatientSubject().getId() : c.getEmployeeSubject().getId();
+            resourceAttrs.put("owner-id", String.valueOf(owner));
+        } else if (resource instanceof GdprRequest r) {
+            Long owner = r.getPatientSubject() != null ? r.getPatientSubject().getId() : r.getEmployeeSubject().getId();
+            resourceAttrs.put("owner-id", String.valueOf(owner));
+        }
+
         actionAttrs.put("action-id", action);
         if (lawfulBasis != null && !lawfulBasis.isBlank()) {
             subjectAttrs.put("lawful-basis", lawfulBasis);

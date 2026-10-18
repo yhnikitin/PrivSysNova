@@ -16,12 +16,12 @@ public class GdprRequest {
 
     @ManyToOne
     @JoinColumn(name = "employee_subject_id")
-    //@JsonIgnore
+    @JsonIgnore
     private Employee employeeSubject;
 
     @ManyToOne
     @JoinColumn(name = "patient_subject_id")
-    //@JsonIgnore
+    @JsonIgnore
     private Patient patientSubject;
 
     @Column(name = "subject_type", nullable = false, length = 20)
@@ -44,7 +44,7 @@ public class GdprRequest {
 
     @ManyToOne
     @JoinColumn(name = "handled_by")
-    //@JsonIgnore
+    @JsonIgnore
     private Employee handledBy;
 
     @Transient

@@ -10,6 +10,7 @@ pt\unl\fct\di\syspriv\util\ExportEntity$Redactable.class
 pt\unl\fct\di\syspriv\xacml\XACMLPDP.class
 pt\unl\fct\di\syspriv\entities\GdprRequest.class
 pt\unl\fct\di\syspriv\entities\Payment.class
+pt\unl\fct\di\syspriv\storage\GdprSeedData.class
 pt\unl\fct\di\syspriv\DataSafe.class
 pt\unl\fct\di\syspriv\entities\Anonymizable.class
 pt\unl\fct\di\syspriv\gdpr\GDPRHandler$2.class

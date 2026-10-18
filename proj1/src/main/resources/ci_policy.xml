@@ -644,6 +644,38 @@
             </Rule>
         </Policy>
 
+        <!-- Own Consent and Requests necessary?-->
+        <Policy PolicyId="OwnConsentAndRequests" Version="1.0"
+                RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+            <Description>A person can read their own consent records and GDPR requests.</Description>
+            <Target />
+            <Rule RuleId="OwnConsentAndRequestsRule" Effect="Permit">
+                <Condition>
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-subset">
+                            <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                                 AttributeId="resource-type"
+                                                 DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
+                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ConsentData</AttributeValue>
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">GdprRequestData</AttributeValue>
+                            </Apply>
+                        </Apply>
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-set-equals">
+                            <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                                 AttributeId="id"
+                                                 DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
+                            <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                                 AttributeId="owner-id"
+                                                 DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                 MustBePresent="false"/>
+                        </Apply>
+                    </Apply>
+                </Condition>
+            </Rule>
+        </Policy>
         <!-- Default - Deny -->
         <Policy PolicyId="DefaultDeny" Version="1.0"
                 RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">

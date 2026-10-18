@@ -42,15 +42,15 @@ public class Patient {
     private Employee primaryDoctor;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    //@JsonIgnore
+    @JsonIgnore
     private List<Appointment> appointments = new ArrayList<>();
 
     @OneToMany(mappedBy = "patientSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonIgnore
+    @JsonIgnore
     private List<ConsentRecord> consentRecords = new ArrayList<>();
 
     @OneToMany(mappedBy = "patientSubject", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonIgnore
+    @JsonIgnore
     private List<GdprRequest> gdprRequests = new ArrayList<>();
 
     @Column(name = "erasure_requested", columnDefinition = "boolean default 0")
@@ -109,6 +109,8 @@ public class Patient {
     public void setGdprRequests(List<GdprRequest> gdprRequests) { this.gdprRequests = gdprRequests; }
     public Boolean getErasureRequested () { return erasureRequested;}
     public void setErasureRequested(Boolean erasureRequested){ this.erasureRequested =erasureRequested;}
+    public LocalDateTime getErasureCompletedAt(){ return erasureCompletedAt;}
+    public void setErasureCompletedAt (LocalDateTime erasureCompletedAt){ this.erasureCompletedAt =erasureCompletedAt;}
 
     // For debugging and logging purposes.
     @Override

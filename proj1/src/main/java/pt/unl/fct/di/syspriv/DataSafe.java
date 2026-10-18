@@ -132,6 +132,11 @@ public class DataSafe {
         }
 
         int tableChoice = promptTableSelection(scanner);
+        if (tableChoice < 1 || tableChoice > 6) {
+            System.out.println("Invalid choice.");
+            return;
+        }
+
         if (tableChoice == 6) {
             return;
         }
@@ -203,7 +208,8 @@ public class DataSafe {
         try {
             String exportJson = new GDPRHandler(hibernate, loggedInPerson, lawfulBasis).handleRequest(requestType, pdp);
             if ("ACCESS".equals(requestType)) {
-                System.out.println(exportJson);
+                System.out.println("File exported as export.json");
+                java.nio.file.Files.writeString(java.nio.file.Path.of("export.json"), exportJson);
             } else {
                 System.out.println("GDPR erasure request completed.");
             }

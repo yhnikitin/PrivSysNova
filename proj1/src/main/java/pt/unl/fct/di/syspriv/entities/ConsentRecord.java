@@ -1,5 +1,6 @@
 package pt.unl.fct.di.syspriv.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,12 +15,12 @@ public class ConsentRecord {
 
     @ManyToOne
     @JoinColumn(name = "employee_subject_id")
-    //@JsonIgnore
+    @JsonIgnore
     private Employee employeeSubject;
 
     @ManyToOne
     @JoinColumn(name = "patient_subject_id")
-    //@JsonIgnore
+    @JsonIgnore
     private Patient patientSubject;
 
     @Column(name = "subject_type", nullable = false, length = 20)

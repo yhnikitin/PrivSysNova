@@ -111,18 +111,24 @@ public class GDPRHandler implements Exportable {
         request.setStatus("PENDING");
         hibernate.update(request);
 
-        String anonymizedIdentifier = "ANON-" + UUID.randomUUID();
+        String anonymizedIdentifier = "ANON_" + UUID.randomUUID();
         List<Object> updates = new ArrayList<>();
         if (subject instanceof Employee employee) {
             Employee storedEmployee = hibernate.get(Employee.class, employee.getId());
             storedEmployee.setName(anonymizedIdentifier);
             storedEmployee.setUpdatedAt(LocalDateTime.now());
+
+            storedEmployee.setErasureRequested(true);
+            storedEmployee.setErasureCompletedAt(LocalDateTime.now());
             updates.add(storedEmployee);
         } else if (subject instanceof Patient patient) {
             Patient storedPatient = hibernate.get(Patient.class, patient.getId());
             storedPatient.setName(anonymizedIdentifier);
             storedPatient.setAddress(anonymizedIdentifier);
             storedPatient.setUpdatedAt(LocalDateTime.now());
+
+            storedPatient.setErasureRequested(true);
+            storedPatient.setErasureCompletedAt(LocalDateTime.now());
             updates.add(storedPatient);
 
             List<Payment> payments = hibernate.jpql(
@@ -179,6 +185,7 @@ public class GDPRHandler implements Exportable {
             } else {
                 GdprRequest redacted = new GdprRequest();
                 redacted.setId(record.getId());
+                redacted.setStatus(null);
                 redacted.setRedacted(true);
                 exported.add(redacted);
             }
