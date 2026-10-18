@@ -1,51 +1,41 @@
 {
-  "patient" : {
+  "employee" : {
     "row" : {
-      "id" : 1026,
-      "name" : "GDPR Test Marketing",
-      "birthdate" : "1990-01-01 00:00:00",
-      "insurance" : "TestInsurance",
-      "address" : "Rua A, Lisboa",
-      "createdAt" : "2026-10-17T23:11:18.159",
-      "updatedAt" : "2026-10-17T23:11:18.159",
+      "id" : 5,
+      "name" : "N.P. Lisa Park",
+      "role" : "Nurse",
+      "department" : "Emergency",
+      "isAdmin" : false,
       "erasureRequested" : false,
-      "stringId" : "1026"
+      "stringId" : "5"
     }
   },
-  "appointments" : [ ],
-  "payments" : [ ],
-  "consentRecords" : [ {
-    "id" : 1,
-    "subjectType" : "PATIENT",
-    "purpose" : "marketing",
-    "granted" : true,
-    "grantedAt" : "2026-10-07T23:11:18.156",
-    "policyVersion" : "v1",
-    "source" : "web"
+  "appointments" : [ {
+    "redactedRowId" : 2006
+  }, {
+    "redactedRowId" : 2017
+  }, {
+    "redactedRowId" : 2029
+  }, {
+    "redactedRowId" : 2040
   } ],
+  "payments" : [ {
+    "redactedRowId" : 3006
+  }, {
+    "redactedRowId" : 3017
+  }, {
+    "redactedRowId" : 3029
+  }, {
+    "redactedRowId" : 3040
+  } ],
+  "consentRecords" : [ ],
   "gdprRequests" : [ {
-    "id" : 12,
-    "subjectType" : "PATIENT",
+    "id" : 16,
+    "subjectType" : "EMPLOYEE",
     "requestType" : "ACCESS",
-    "lawfulBasis" : "contract",
-    "requestedAt" : "2026-10-18T19:20:13.629",
-    "completedAt" : "2026-10-18T19:20:13.691",
-    "status" : "COMPLETED"
-  }, {
-    "id" : 13,
-    "subjectType" : "PATIENT",
-    "requestType" : "ACCESS",
-    "lawfulBasis" : "legal-obligation",
-    "requestedAt" : "2026-10-18T19:24:25.137",
-    "completedAt" : "2026-10-18T19:24:25.195",
-    "status" : "COMPLETED"
-  }, {
-    "id" : 14,
-    "subjectType" : "PATIENT",
-    "requestType" : "ACCESS",
-    "lawfulBasis" : "legal-obligation",
-    "requestedAt" : "2026-10-18T19:38:31.698",
-    "completedAt" : "2026-10-18T19:38:31.751",
+    "lawfulBasis" : "public-task",
+    "requestedAt" : "2026-10-18T21:44:19.476",
+    "completedAt" : "2026-10-18T21:44:19.608",
     "status" : "COMPLETED"
   } ]
 }

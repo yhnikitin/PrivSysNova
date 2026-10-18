@@ -57,6 +57,7 @@ public class XACMLPDP {
         throw new IllegalStateException("Policy file not found: " + policyFile);
     }
 
+    /*
     public boolean checkAccess(Object requester, Object resource, String context) throws Exception {
         Map<String, String> subjectAttrs = new HashMap<>();
         Map<String, String> resourceAttrs = new HashMap<>();
@@ -111,8 +112,9 @@ public class XACMLPDP {
         logger.debug(result.toString());
         return result.getDecision() == DecisionType.PERMIT;
     }
+    */
 
-        public boolean checkAccessGDPR(Object requester, Object resource, String action, String lawfulBasis,
+    public boolean checkAccessGDPR(Object requester, Object resource, String action, String lawfulBasis,
             String context) throws Exception {
         Objects.requireNonNull(requester, "requester must not be null");
         Objects.requireNonNull(resource, "resource must not be null");

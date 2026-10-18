@@ -13,6 +13,9 @@ import java.util.Scanner;
 
 public class DataSafe {
 
+    private static final int HEALTH_DATA = 5;
+    private static final int BACK = 6;
+
     private static final Logger logger = LoggerFactory.getLogger(DataSafe.class);
     private final Hibernate hibernate = Hibernate.getInstance();
     private final XACMLPDP pdp;
@@ -29,8 +32,8 @@ public class DataSafe {
             app.run();
 
         } catch (Exception e) {
-            logger.error("Failed to initialize application: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Failed to initialize application: ", e);
+           // e.printStackTrace();
         }
     }
 
@@ -41,25 +44,30 @@ public class DataSafe {
             logger.error("Login failed. Exiting...");
             return;
         }
-
         displayWelcome();
 
         boolean running = true;
         while (running) {
-            switch (promptMainMenu(scanner)) {
+
+            System.out.println("\n=== What would you like to do? ===");
+            System.out.println("1. View hospital data\n2. My data rights (GDPR request)\n3. Exit");
+            System.out.print("Select an option: ");
+
+            int option = readInt(scanner);
+            switch (option) {
                 case 1 -> handleDataAccessMenu(scanner);
                 case 2 -> handleGdprRequestMenu(scanner);
                 case 3 -> {
-                    running = false;
                     System.out.println("Exiting...");
+                    running = false;
                 }
                 default -> System.out.println("Invalid selection. Please try again.");
             }
         }
-
         scanner.close();
     }
 
+    //--- LOG-IN and Welcome ----
     private boolean login(Scanner scanner) {
         System.out.println("Are you an employee or patient?");
         System.out.println("1. Employee");
@@ -71,59 +79,136 @@ public class DataSafe {
         System.out.print("Enter your name to login: ");
         String loginName = scanner.nextLine().trim();
 
-        switch (choice) {
-            case "1":
-                List<Employee> employees = hibernate.jpql("FROM Employee", Employee.class);
-                for (Employee e : employees) {
-                    if (e.getName().equalsIgnoreCase(loginName)) {
-                        loggedInPerson = e;
-                        return true;
-                    }
-                }
-                System.out.println("Employee not found.");
-                return false;
-
-            case "2":
-                List<Patient> patients = hibernate.jpql("FROM Patient", Patient.class);
-                for (Patient p : patients) {
-                    if (p.getName().equalsIgnoreCase(loginName)) {
-                        loggedInPerson = p;
-                        return true;
-                    }   
-                }
-                System.out.println("Patient not found.");
-                return false;
-
-            default:
+        return switch (choice) {
+            case "1" -> loginEmployee(loginName);
+            case "2" -> loginPatient(loginName);
+            default -> {
                 System.out.println("Invalid option.");
-                return false;
+                yield false;
+            }
+        };
+    }
+
+    private boolean loginEmployee(String loginName){
+        List<Employee> employees = hibernate.jpql("FROM Employee", Employee.class);
+        for (Employee e : employees) {
+            if (e.getName().equalsIgnoreCase(loginName)) {
+                loggedInPerson = e;
+                return true;
+            }
         }
+        System.out.println("Employee not found.");
+        return false;
+    }
+
+    private boolean loginPatient (String loginName){
+        List<Patient> patients = hibernate.jpql("FROM Patient", Patient.class);
+        for (Patient p : patients) {
+            if (p.getName().equalsIgnoreCase(loginName)) {
+                loggedInPerson = p;
+                return true;
+            }
+        }
+        System.out.println("Patient not found.");
+        return false;
     }
 
     private void displayWelcome() {
         if (loggedInPerson instanceof Employee emp) {
             System.out.println("Welcome, " + emp.getName() + " (" + emp.getRole() + ")!");
         } else if (loggedInPerson instanceof Patient pat) {
-            System.out.println("Welcome, " + pat.getName() + "! (ID " + pat.getId() + ")"); //TEST
-            //System.out.println("Welcome, " + pat.getName() + "!");
+            System.out.println("Welcome, " + pat.getName() + "!");
         } else {
             System.out.println("Welcome!");
         }
     }
 
-    private int promptMainMenu(Scanner scanner) {
-        System.out.println("\n=== What would you like to do? ===");
-        System.out.println("1. Check/access data");
-        System.out.println("2. Make a GDPR request");
-        System.out.println("3. Exit");
+    // --- Main Menu Prompt 1 ----
+    private String promptContext(Scanner scanner) {
+        System.out.println("\n=== Select the context of this access ===");
+        System.out.println("1. Billing and Payments\n2. Scheduling\n3. Check-in\n4. Hiring\n5. Appointment\n6. Emergency");
         System.out.print("Select an option: ");
+
+        int choice = readInt(scanner);
+        return switch (choice) {
+            case 1 -> "Billing and Payments";
+            case 2 -> "Scheduling";
+            case 3 -> "Check-in";
+            case 4 -> "Hiring";
+            case 5 -> "Appointment";
+            case 6 -> "Emergency";
+            default -> null;
+        };
+    }
+
+    // --- Main Menu Prompt 2 ----
+    private int promptTableSelection(Scanner scanner) {
+        System.out.println("\n=== Available tables to request data from ===");
+        System.out.println("1. Employees\n2. Patients\n3. Appointments\n4. Payments\n5. Health Data (Anonymized Dataset Export)\n6. Back");
+        System.out.print("Select an option: ");
+
+        return readInt(scanner);
+    }
+
+    private Long promptName(int tableChoice, Scanner scanner) {
+        System.out.print("Please enter the name of the person you'd like to access: ");
+        String name = scanner.nextLine().trim();
+
+        if (tableChoice == 1) {
+            for (Employee e : hibernate.jpql("FROM Employee", Employee.class)) {
+                if (e.getName().equalsIgnoreCase(name)) return e.getId();
+            }
+        } else if (tableChoice == 2) {
+            for (Patient p : hibernate.jpql("FROM Patient", Patient.class)) {
+                if (p.getName().equalsIgnoreCase(name)) return p.getId();
+            }
+        }
+        return null;
+    }
+
+    private Long promptId(Scanner scanner) {
+        System.out.print("Please enter the ID of the row you'd like to access: ");
+        String input = scanner.nextLine();
         try {
-            return Integer.parseInt(scanner.nextLine());
+            return Long.valueOf(input);
         } catch (NumberFormatException e) {
-            return -1;
+            return null;
         }
     }
 
+
+    private Long handleAccessIdOrName(int tablechoice, Scanner scanner) {
+        System.out.println("\n=== How would you like to access? ===");
+        System.out.println("1. Access by name\n2. Access by ID");
+        System.out.print("Select an option: ");
+
+        int option = readInt(scanner);
+        return switch(option){
+            case 1 -> promptName(tablechoice, scanner);
+            case 2 -> promptId(scanner);
+            default -> null;
+        };
+    }
+
+    // --- Main Menu Prompt 3 ----
+    private String promptLawfulBasis(Scanner scanner) {
+        System.out.println("\n=== Select the documented lawful basis for this access ===");
+        System.out.println("1. Consent\n2. Contract\n3. Legal obligation\n4. Vital interests\n5. Public task\n6. Legitimate interests\n7. Cancel");
+        System.out.print("Select an option: ");
+
+        int option = readInt(scanner);
+        return switch (option) {
+            case 1 -> "consent";
+            case 2 -> "contract";
+            case 3 -> "legal-obligation";
+            case 4 -> "vital-interests";
+            case 5 -> "public-task";
+            case 6 -> "legitimate-interests";
+            default -> null;
+        };
+    }
+
+    // --- Main Menu (main) ----
     private void handleDataAccessMenu(Scanner scanner) {
         String context = promptContext(scanner);
         if (context == null) {
@@ -132,26 +217,24 @@ public class DataSafe {
         }
 
         int tableChoice = promptTableSelection(scanner);
-        if (tableChoice < 1 || tableChoice > 6) {
-            System.out.println("Invalid choice.");
+        if (tableChoice == BACK) {
             return;
         }
-
-        if (tableChoice == 6) {
+        else if (tableChoice < 1 || tableChoice > BACK) {
+            System.out.println("Invalid choice.");
             return;
         }
 
         Long id = null;
         if (tableChoice == 1 || tableChoice == 2) {
             id = handleAccessIdOrName(tableChoice, scanner);
-        } else if (tableChoice != 5) {
+        } else if (tableChoice != HEALTH_DATA) {
             id = promptId(scanner);
         }
-        if (id == null && tableChoice != 5) {
+        if (id == null && tableChoice != HEALTH_DATA) {
             System.out.println("Invalid ID or name. Please try again.");
             return;
         }
-
 
         String lawfulBasis = promptLawfulBasis(scanner);
         if (lawfulBasis == null) {
@@ -162,31 +245,10 @@ public class DataSafe {
         handleDataAccess(context, tableChoice, id, lawfulBasis, scanner);
     }
 
-    private Long handleAccessIdOrName(int tablechoice, Scanner scanner) {
-        System.out.println("\n=== How would you like to access? ===");
-        System.out.println("1. Access by name\n2. Access by ID");
-        System.out.print("Select an option: ");
-
-        String input = scanner.nextLine();
-
-        Long ID = null;
-        switch(input){
-            case "1" -> ID = promptName(tablechoice, scanner);
-            case "2" -> ID = promptId(scanner);
-        }
-
-        try {
-            return ID;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
 
     private void handleGdprRequestMenu(Scanner scanner) {
         System.out.println("\n=== Select a GDPR request type ===");
-        System.out.println("1. Access");
-        System.out.println("2. Erasure");
-        System.out.println("3. Cancel");
+        System.out.println("1. Access (Export my data)\n2. Erasure (anonymize my data)\n3. Cancel");
         System.out.print("Select an option: ");
 
         String requestType = switch (scanner.nextLine()) {
@@ -219,99 +281,12 @@ public class DataSafe {
         }
     }
 
-    private String promptLawfulBasis(Scanner scanner) {
-        System.out.println("\n=== Select the documented lawful basis for this access ===");
-        System.out.println("1. Consent");
-        System.out.println("2. Contract");
-        System.out.println("3. Legal obligation");
-        System.out.println("4. Vital interests");
-        System.out.println("5. Public task");
-        System.out.println("6. Legitimate interests");
-        System.out.println("7. Cancel");
-        System.out.print("Select an option: ");
-        return switch (scanner.nextLine()) {
-            case "1" -> "consent";
-            case "2" -> "contract";
-            case "3" -> "legal-obligation";
-            case "4" -> "vital-interests";
-            case "5" -> "public-task";
-            case "6" -> "legitimate-interests";
-            default -> null;
-        };
-    }
-
-    private String promptContext(Scanner scanner) {
-        System.out.println("\n=== Please select a context ===");
-        System.out.println("1. Billing and Payments");
-        System.out.println("2. Scheduling");
-        System.out.println("3. Check-in");
-        System.out.println("4. Hiring");
-        System.out.println("5. Appointment");
-        System.out.println("6. Emergency");
-        System.out.print("Select an option: ");
-
-        String choice = scanner.nextLine();
-        return switch (choice) {
-            case "1" -> "Billing and Payments";
-            case "2" -> "Scheduling";
-            case "3" -> "Check-in";
-            case "4" -> "Hiring";
-            case "5" -> "Appointment";
-            case "6" -> "Emergency";
-            default -> null;
-        };
-    }
-
-    private int promptTableSelection(Scanner scanner) {
-        System.out.println("\n=== Available tables to request data from ===");
-        System.out.println("1. Employees");
-        System.out.println("2. Patients");
-        System.out.println("3. Appointments");
-        System.out.println("4. Payments");
-        System.out.println("5. Health Data (Anonymized Dataset Export)");
-        System.out.println("6. Exit");
-        System.out.print("Select an option: ");
-
-        String input = scanner.nextLine();
-        try {
-            return Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-
-    private Long promptId(Scanner scanner) {
-        System.out.print("Please enter the ID of the row you'd like to access: ");
-        String input = scanner.nextLine();
-        try {
-            return Long.valueOf(input);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private Long promptName(int tableChoice, Scanner scanner) {
-        System.out.print("Please enter the name of the person you'd like to access: ");
-        String name = scanner.nextLine().trim();
-
-        if (tableChoice == 1) {
-            for (Employee e : hibernate.jpql("FROM Employee", Employee.class)) {
-                if (e.getName().equalsIgnoreCase(name)) return e.getId();
-            }
-        } else if (tableChoice == 2) {
-            for (Patient p : hibernate.jpql("FROM Patient", Patient.class)) {
-                if (p.getName().equalsIgnoreCase(name)) return p.getId();
-            }
-        }
-        return null;
-    }
-
 
     private void handleDataAccess(String context, int tableChoice, Long id, String lawfulBasis, Scanner scanner) {
         Class<?> entityClass;
         String entityName;
 
-        if (tableChoice == 5) {
+        if (tableChoice == HEALTH_DATA) {
             handleHealthDataAccess(context, lawfulBasis, scanner);
             return;
         }
@@ -339,7 +314,7 @@ public class DataSafe {
         }
 
         try {
-            logger.info("Fetching from" + entityName + "ID " + Long.toString(id));
+            logger.info("Fetching from " + entityName + " ID " + id);
             Object result = hibernate.get(entityClass, id);
 
             if (result == null) {
@@ -353,24 +328,24 @@ public class DataSafe {
                 System.out.println("Access Granted!");
                 System.out.println(result); //Added to sho result on the prompt
             } else {
-                System.out.println("Access Denied: You do not have permission to view "
-                                + entityName + " data.");
+                System.out.println("Access Denied: You do not have permission to view " + entityName + " data.");
             }
 
         } catch (Exception e) {
-            logger.error("Error accessing data: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error accessing data: " + e);
+            //e.printStackTrace();
         }
     }
 
     private void handleHealthDataAccess(String context, String lawfulBasis, Scanner scanner) {
-        System.out.print("Enter 'k' value for k-anonymity (e.g., 2): ");
-        int k = Integer.parseInt(scanner.nextLine());
-        
-        System.out.print("Enter 't' value for t-closeness (e.g., 0.2): ");
-        float t = Float.parseFloat(scanner.nextLine());
 
         try {
+            System.out.print("Enter 'k' value for k-anonymity (e.g., 2): ");
+            int k = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Enter 't' value for t-closeness (e.g., 0.2): ");
+            float t = Float.parseFloat(scanner.nextLine());
+
             List<HealthData> allHealthData = hibernate.jpql("FROM HealthData", HealthData.class);
             List<AnonymousHealthData> dataToAnonymize = new java.util.ArrayList<>();
 
@@ -400,8 +375,17 @@ public class DataSafe {
             }
 
         } catch (Exception e) {
-            logger.error("Error generating anonymized health data: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error generating anonymized health data: " + e);
+            //e.printStackTrace();
+        }
+    }
+
+    // --- AUX ----
+    private int readInt(Scanner scanner) {
+        try {
+            return Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 }
