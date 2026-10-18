@@ -11,74 +11,37 @@
         <Policy PolicyId="ConsentPolicy" Version="1.0"
                 RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
             <Description>
-                Marketing actions are denied unless the subject has granted marketing consent
-                and that consent has not been withdrawn. A valid consent does not itself grant
-                access; the remaining hospital policies still authorize the request.
+                Marketing actions are permitted only when the subject has granted marketing consent
+                and that consent has not been withdrawn; otherwise they are denied.
             </Description>
             <Target>
-                <AnyOf>
-                    <AllOf>
-                        <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">marketing</AttributeValue>
-                            <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
-                                                 AttributeId="action-id"
-                                                 DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="false"/>
-                        </Match>
-                    </AllOf>
-                </AnyOf>
+                <AnyOf><AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">marketing</AttributeValue>
+                        <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+                                             AttributeId="action-id"
+                                             DataType="http://www.w3.org/2001/XMLSchema#string"
+                                             MustBePresent="false"/>
+                    </Match>
+                </AllOf></AnyOf>
             </Target>
-            <Rule RuleId="DenyMarketingWithoutActiveConsent" Effect="Deny">
+            <Rule RuleId="PermitMarketingWithActiveConsent" Effect="Permit">
                 <Condition>
-                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not">
-                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
-                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
-                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
-                                    <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                         AttributeId="consent-marketing"
-                                                         DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                         MustBePresent="true"/>
-                                </Apply>
-                            </Apply>
-                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">false</AttributeValue>
-                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
-                                    <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                         AttributeId="consent-withdrawn"
-                                                         DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                         MustBePresent="true"/>
-                                </Apply>
-                            </Apply>
-                        </Apply>
-                    </Apply>
-                </Condition>
-            </Rule>
-        </Policy>
-        <Policy PolicyId="ErasurePolicy" Version="1.0"
-                RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
-            <Description>Deny access while an erasure request is active, except for the DPO role.</Description>
-            <Target>
-                <AnyOf>
-                    <AllOf>
-                        <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
-                            <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                 AttributeId="erasure-requested"
-                                                 DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                 MustBePresent="false"/>
-                        </Match>
-                    </AllOf>
-                </AnyOf>
-            </Target>
-            <Rule RuleId="DenyDuringErasureExceptDPO" Effect="Deny">
-                <Condition>
-                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not">
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
                         <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">DPO</AttributeValue>
+                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
                             <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
                                 <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                     AttributeId="role"
+                                                     AttributeId="consent-marketing"
+                                                     DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                     MustBePresent="true"/>
+                            </Apply>
+                        </Apply>
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">false</AttributeValue>
+                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+                                <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                                     AttributeId="consent-withdrawn"
                                                      DataType="http://www.w3.org/2001/XMLSchema#string"
                                                      MustBePresent="true"/>
                             </Apply>
@@ -86,49 +49,78 @@
                     </Apply>
                 </Condition>
             </Rule>
+            <Rule RuleId="DenyMarketingWithoutActiveConsent" Effect="Deny"/>
         </Policy>
-        <Policy PolicyId="RetentionPolicy" Version="1.0"
+
+        <Policy PolicyId="ErasurePolicy" Version="1.0"
                 RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
-            <Description>Deny access after retention expires, except for Auditors and DPOs.</Description>
+            <Description>While an erasure request is active, only the DPO is permitted; everyone else is denied.</Description>
             <Target>
-                <AnyOf>
-                    <AllOf>
+                <AnyOf><AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
+                        <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                             AttributeId="erasure-requested"
+                                             DataType="http://www.w3.org/2001/XMLSchema#string"
+                                             MustBePresent="false"/>
+                    </Match>
+                </AllOf></AnyOf>
+            </Target>
+            <Rule RuleId="PermitDPODuringErasure" Effect="Permit">
+                <Target>
+                    <AnyOf><AllOf>
                         <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
+                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">DPO</AttributeValue>
                             <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                 AttributeId="retention-expired"
+                                                 AttributeId="role"
                                                  DataType="http://www.w3.org/2001/XMLSchema#string"
                                                  MustBePresent="false"/>
                         </Match>
-                    </AllOf>
-                </AnyOf>
-            </Target>
-            <Rule RuleId="DenyAfterRetentionExceptAuditorOrDPO" Effect="Deny">
-                <Condition>
-                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not">
-                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:or">
-                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Auditor</AttributeValue>
-                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
-                                    <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                         AttributeId="role"
-                                                         DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                         MustBePresent="true"/>
-                                </Apply>
-                            </Apply>
-                            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">DPO</AttributeValue>
-                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
-                                    <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-                                                         AttributeId="role"
-                                                         DataType="http://www.w3.org/2001/XMLSchema#string"
-                                                         MustBePresent="true"/>
-                                </Apply>
-                            </Apply>
-                        </Apply>
-                    </Apply>
-                </Condition>
+                    </AllOf></AnyOf>
+                </Target>
             </Rule>
+            <Rule RuleId="DenyDuringErasureExceptDPO" Effect="Deny"/>
+        </Policy>
+
+        <Policy PolicyId="RetentionPolicy" Version="1.0"
+                RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+            <Description>After retention expires, only Auditors and DPOs are permitted; everyone else is denied.</Description>
+            <Target>
+                <AnyOf><AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">true</AttributeValue>
+                        <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                             AttributeId="retention-expired"
+                                             DataType="http://www.w3.org/2001/XMLSchema#string"
+                                             MustBePresent="false"/>
+                    </Match>
+                </AllOf></AnyOf>
+            </Target>
+            <Rule RuleId="PermitAuditorOrDPOAfterRetention" Effect="Permit">
+                <Target>
+                    <AnyOf>
+                        <AllOf>
+                            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Auditor</AttributeValue>
+                                <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                                     AttributeId="role"
+                                                     DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                     MustBePresent="false"/>
+                            </Match>
+                        </AllOf>
+                        <AllOf>
+                            <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">DPO</AttributeValue>
+                                <AttributeDesignator Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                                     AttributeId="role"
+                                                     DataType="http://www.w3.org/2001/XMLSchema#string"
+                                                     MustBePresent="false"/>
+                            </Match>
+                        </AllOf>
+                    </AnyOf>
+                </Target>
+            </Rule>
+            <Rule RuleId="DenyAfterRetentionExceptAuditorOrDPO" Effect="Deny"/>
         </Policy>
         <Policy PolicyId="SpecialCategoryPolicy" Version="1.0"
                 RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
