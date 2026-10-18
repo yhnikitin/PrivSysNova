@@ -1,6 +1,5 @@
 package pt.unl.fct.di.syspriv.util;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;

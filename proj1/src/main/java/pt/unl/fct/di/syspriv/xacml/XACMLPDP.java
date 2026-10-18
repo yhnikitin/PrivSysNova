@@ -1,7 +1,5 @@
 package pt.unl.fct.di.syspriv.xacml;
 
-
-import pt.unl.fct.di.syspriv.DataSafe;
 import pt.unl.fct.di.syspriv.entities.*;
 import pt.unl.fct.di.syspriv.storage.Hibernate;
 
@@ -51,63 +49,6 @@ public class XACMLPDP {
         throw new IllegalStateException("Policy file not found: " + policyFile);
     }
 
-    /*
-    public boolean checkAccess(Object requester, Object resource, String context) throws Exception {
-        Map<String, String> subjectAttrs = new HashMap<>();
-        Map<String, String> resourceAttrs = new HashMap<>();
-        Map<String, String> actionAttrs = new HashMap<>();
-        Map<String, String> envAttrs = new HashMap<>();
-
-        // Subject
-         if (requester instanceof Employee employee) {
-            subjectAttrs.put("role", employee.getRole());
-            subjectAttrs.put("id", String.valueOf(employee.getId()));
-        } else if (requester instanceof Patient patient) {
-            subjectAttrs.put("role", "Patient");
-            subjectAttrs.put("id", String.valueOf(patient.getId()));
-        }
-
-         //Resource
-        if (resource instanceof Employee employee) {
-            resourceAttrs.put("id", String.valueOf(employee.getId()));
-            resourceAttrs.put("resource-type", "EmployeeData");
-        } else if (resource instanceof Patient patient) {
-            resourceAttrs.put("id", String.valueOf(patient.getId()));
-            resourceAttrs.put("resource-type", "PatientData");
-            //if (patient.getPrimaryDoctor() != null) { all patients have primary doc
-            resourceAttrs.put("doctorId", String.valueOf(patient.getPrimaryDoctor().getId()));
-            //}
-        } else if (resource instanceof Appointment appointment) {
-            resourceAttrs.put("id", String.valueOf(appointment.getId()));
-            resourceAttrs.put("resource-type", "AppointmentData");
-        } else if (resource instanceof Payment payment) {
-            resourceAttrs.put("id", String.valueOf(payment.getId()));
-            resourceAttrs.put("resource-type", "PaymentData");
-        }
-
-        //Context
-        if (context != null && !context.isBlank()) {
-            envAttrs.put("context", context);
-        }
-        
-        actionAttrs.put("action-id", "read");
-
-        DecisionRequestBuilder<?> requestBuilder = pdp.newRequestBuilder(-1, -1);
-
-        addAttributes(requestBuilder, SUBJECT_CATEGORY, subjectAttrs);
-        addAttributes(requestBuilder, RESOURCE_CATEGORY, resourceAttrs);
-        addAttributes(requestBuilder, ACTION_CATEGORY, actionAttrs);
-        addAttributes(requestBuilder, ENV_CATEGORY, envAttrs);
-
-        var request = requestBuilder.build(true);
-        logger.debug(request.toString());
-        DecisionResult result = pdp.evaluate(request);
-        
-        logger.debug(result.toString());
-        return result.getDecision() == DecisionType.PERMIT;
-    }
-    */
-
     public boolean checkAccessGDPR(Object requester, Object resource, String action, String lawfulBasis,
             String context) throws Exception {
         Objects.requireNonNull(requester, "requester must not be null");
@@ -121,23 +62,6 @@ public class XACMLPDP {
         Map<String, String> resourceAttrs = new HashMap<>();
         Map<String, String> actionAttrs = new HashMap<>();
         Map<String, String> envAttrs = new HashMap<>();
-
-        /*List<ConsentRecord> consents = findConsentRecords(requester);
-        List<GdprRequest> requests = findGdprRequests(requester);
-        ConsentRecord marketingConsent = latestConsent(consents, "marketing");
-        List<ConsentRecord> researchConsents = consents;
-
-        //questionable but should limit amount of queries
-        if (resource instanceof HealthData healthData
-            && (!(requester instanceof Patient patient)
-            || !Objects.equals(patient.getId(), healthData.getPatientId()))) {
-            researchConsents = Hibernate.getInstance().jpql(
-                "FROM ConsentRecord c WHERE c.patientSubject.id = " + healthData.getPatientId()
-                    + " ORDER BY c.grantedAt",
-                ConsentRecord.class);
-        }
-        ConsentRecord researchConsent = latestConsent(researchConsents, "research");
-    */
 
         Object owner = getOwner(resource);
         List<ConsentRecord> consents = owner == null ? List.of() : findConsentRecords(owner);

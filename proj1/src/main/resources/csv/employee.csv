@@ -1,0 +1,30 @@
+1,Dr. Sarah Chen,Doctor,Executive,TRUE
+2,Dr. Michael Rodriguez,Doctor,Surgery,FALSE
+3,Dr. Emily Thompson,Doctor,Cardiology,FALSE
+4,Dr. James O'Brien,Doctor,Neurology,FALSE
+5,N.P. Lisa Park,Nurse,Emergency,FALSE
+6,Dr. Robert Kim,Doctor,Radiology,FALSE
+7,Nurse David Smith,Nurse,Administration,FALSE
+8,Dr. Amanda Foster,Doctor,Psychiatry,FALSE
+9,Dr. William Zhang,Doctor,Oncology,FALSE
+10,Maria Gonzalez,Clerk,Administration,FALSE
+11,Dr. Thomas Miller,Doctor,Orthopedics,FALSE
+12,N.P. Jessica Brown,Nurse,Family Medicine,FALSE
+13,Dr. Kevin Davis,Doctor,Anesthesiology,FALSE
+14,IT Manager Jennifer Lee,ITAdmin,IT,TRUE
+15,Rachel Adams,Accountant,Administration,FALSE
+16,Dr. Rachel Green,Doctor,Pediatrics,FALSE
+17,Dr. Daniel Foster,Doctor,Dermatology,FALSE
+18,N.P. Amanda Clark,Nurse,Emergency,FALSE
+19,Dr. Christopher Lee,Doctor,Gastroenterology,FALSE
+20,Dr. Laura Martinez,Doctor,Endocrinology,FALSE
+21,Brian Taylor,DPO,Administration,FALSE
+22,Dr. Nicole White,Doctor,Rheumatology,FALSE
+23,Dr. Andrew Harris,Doctor,Pulmonology,FALSE
+24,Jessica Lewis,DPO,Administration,FALSE
+25,Dr. Stephanie Young,Doctor,Obstetrics,FALSE
+26,Dr. Matthew King,Doctor,Urology,FALSE
+27,N.P. Rebecca Hall,Nurse,Family Medicine,FALSE
+28,Dr. Jonathan Wright,Doctor,Ophthalmology,FALSE
+29,Gregory Scott,DPO,IT,FALSE
+30,Samantha Adams,Auditor,Administration,FALSE

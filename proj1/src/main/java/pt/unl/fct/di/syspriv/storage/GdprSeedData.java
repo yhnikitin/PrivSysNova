@@ -11,25 +11,14 @@ import java.time.LocalDateTime;
 public class GdprSeedData {
 
     public static void main(String[] args) {
-        //seed();
-        //reseed();
-        seedStaff();
-    }
-
-    public static void reseed() {
-        Hibernate db = Hibernate.getInstance();
-
-        var old = db.jpql("from Patient p where p.name like 'GDPR Test%'", Patient.class);
-        if (!old.isEmpty()) {
-            db.delete(old.toArray());
-        }
         seed();
+        seedStaff();
     }
 
     public static void seed() {
         Hibernate db = Hibernate.getInstance();
 
-        // não voltar a inserir se já correste isto
+        // não voltar a inserir
         var existing = db.jpql("from Patient p where p.name like 'GDPR Test%'", Patient.class);
         if (!existing.isEmpty()) {
             System.out.println("Seed GDPR já existe, nada a fazer.");

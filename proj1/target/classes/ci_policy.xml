@@ -676,6 +676,24 @@
                 </Condition>
             </Rule>
         </Policy>
+
+        <Policy PolicyId="HealthDataResearch" Version="1.0"
+                RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+            <Description>Permit health data; consent is enforced by SpecialCategoryPolicy.</Description>
+            <Target>
+                <AnyOf><AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">HealthData</AttributeValue>
+                        <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                             AttributeId="resource-type"
+                                             DataType="http://www.w3.org/2001/XMLSchema#string"
+                                             MustBePresent="false"/>
+                    </Match>
+                </AllOf></AnyOf>
+            </Target>
+            <Rule RuleId="PermitHealthData" Effect="Permit"/>
+        </Policy>
+
         <!-- Default - Deny -->
         <Policy PolicyId="DefaultDeny" Version="1.0"
                 RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">

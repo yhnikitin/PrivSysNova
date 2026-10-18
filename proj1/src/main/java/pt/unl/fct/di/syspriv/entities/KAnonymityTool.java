@@ -90,19 +90,12 @@ public class KAnonymityTool<T extends Anonymizable> {
         return groupedValues;
     }
 
-    // Retained for backward compatibility
     public List<T> runMondrain(List<T> records) {
-        return runMondrian(records, true);
-    }
-
-    // 1st Option: Run Mondrian WITH t-closeness
-    public List<T> runMondrianWithTCloseness(List<T> records) {
-        return runMondrian(records, true);
-    }
-
-    // 2nd Option: Run Mondrian WITHOUT t-closeness (only k-anonymity)
-    public List<T> runMondrianWithoutTCloseness(List<T> records) {
         return runMondrian(records, false);
+    }
+
+    public List<T> runTCloseMondrain(List<T> records) {
+        return runMondrian(records, true);
     }
 
     // Core method that handles both depending on the flag

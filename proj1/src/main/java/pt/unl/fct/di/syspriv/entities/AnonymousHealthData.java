@@ -61,7 +61,6 @@ public class AnonymousHealthData implements Anonymizable {
 
     @Override
     public void setQuasiIdentifiers(Map<String, Object> quasiIdentifiers) {
-        id = ((Number) quasiIdentifiers.get("id")).longValue();
         patientBirthYear = ((Number) quasiIdentifiers.get("patientBirthYear")).floatValue();
         patientPostalCode = ((Number) quasiIdentifiers.get("patientPostalCode")).floatValue();
         diagnosisDate = ((Number) quasiIdentifiers.get("diagnosisDate")).floatValue();

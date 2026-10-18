@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
@@ -140,6 +141,19 @@ public class Hibernate {
         	return query.list();
 		} catch (Exception e) {
 		    throw e;
+		}
+	}
+
+	// --- Added to import cvs ----
+	public void execute(java.util.function.Consumer<Session> work) {
+		Transaction tx = null;
+		try (var session = sessionFactory.openSession()) {
+			tx = session.beginTransaction();
+			work.accept(session);
+			tx.commit();
+		} catch (Exception e) {
+			try { if (tx != null) tx.rollback(); } catch (Exception ignored) {}
+			throw e;
 		}
 	}
 	

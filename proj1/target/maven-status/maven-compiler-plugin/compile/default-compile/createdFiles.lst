@@ -19,3 +19,4 @@ pt\unl\fct\di\syspriv\entities\Appointment.class
 pt\unl\fct\di\syspriv\util\Exportable.class
 pt\unl\fct\di\syspriv\entities\HealthData.class
 pt\unl\fct\di\syspriv\util\ExportEntity.class
+pt\unl\fct\di\syspriv\storage\CsvImporter.class

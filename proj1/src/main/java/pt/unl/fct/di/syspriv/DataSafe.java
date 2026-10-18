@@ -364,7 +364,7 @@ public class DataSafe {
             }
 
             KAnonymityTool<AnonymousHealthData> tool = new KAnonymityTool<>(k, t);
-            List<AnonymousHealthData> anonymizedData = tool.runMondrain(dataToAnonymize);
+            List<AnonymousHealthData> anonymizedData = tool.runTCloseMondrain(dataToAnonymize);
 
             boolean isSafe = tool.isKAnonymous(anonymizedData);
             System.out.println("\nFinal Dataset K-Anonymous Status: " + (isSafe ? "PASSED" : "FAILED"));
@@ -376,7 +376,7 @@ public class DataSafe {
 
         } catch (Exception e) {
             logger.error("Error generating anonymized health data: " + e);
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 

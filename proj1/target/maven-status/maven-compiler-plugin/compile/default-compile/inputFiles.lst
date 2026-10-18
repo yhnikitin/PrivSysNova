@@ -10,6 +10,7 @@ C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\sy
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\entities\Patient.java
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\entities\Payment.java
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\gdpr\GDPRHandler.java
+C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\storage\CsvImporter.java
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\storage\GdprSeedData.java
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\storage\Hibernate.java
 C:\Users\corre\Documents\GitHub\PrivSysNova\proj1\src\main\java\pt\unl\fct\di\syspriv\util\ConfigLoader.java

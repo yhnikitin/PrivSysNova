@@ -4,7 +4,7 @@
         <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
         <property name="hibernate.connection.url">jdbc:sqlite:privsys.db</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
         <mapping class="pt.unl.fct.di.syspriv.entities.Employee"/>
         <mapping class="pt.unl.fct.di.syspriv.entities.Patient"/>
         <mapping class="pt.unl.fct.di.syspriv.entities.Appointment"/>
