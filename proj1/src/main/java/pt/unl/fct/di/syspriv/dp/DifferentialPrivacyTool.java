@@ -66,11 +66,13 @@ public class DifferentialPrivacyTool {
         var count = hibernate.sql(query, Integer.class).get(0);
 
         double sensitivity = 1.0;
-        double noisy = count + laplaceNoise(sensitivity / privacyCost);
-
+        double noise = count + laplaceNoise(sensitivity / privacyCost);
 
         var res = new DPResult();
-        res.setResultValue(count);
+        res.setResultType(DPResult.ResultType.COUNT);
+
+        res.setResultValue((float) noise);
+        res.setQuerySensitivity((float) sensitivity);
 
         res.setResultCode(DPResult.ResultCode.SUCCESS);
         res.setPrivacyBudget(privacyBudget);
@@ -88,9 +90,21 @@ public class DifferentialPrivacyTool {
                 FROM health_data
                 WHERE id IN (%s)
                 """.formatted(idsStr);
-        var sum = hibernate.sql(query, Float.class).get(0);
+        Float sum = hibernate.sql(query, Float.class).get(0);
+        if (sum == null) {
+            sum = 0f;
+        }
+
+        double sensitivity = Math.max(Math.abs(lower), Math.abs(upper));
+        double noise = sum + laplaceNoise(sensitivity / privacyCost);
+
         var res = new DPResult();
-        res.setResultValue(sum);
+        res.setResultType(DPResult.ResultType.SUM);
+
+        res.setResultValue((float) noise);
+        res.setQuerySensitivity((float) sensitivity);
+        res.setClippingLower((float) lower);
+        res.setClippingUpper((float) upper);
 
         res.setResultCode(DPResult.ResultCode.SUCCESS);
         res.setPrivacyBudget(privacyBudget);
@@ -105,15 +119,43 @@ public class DifferentialPrivacyTool {
         if (!spendBudget(privacyCost)) {
             return failResult();
         }
-
-        var query = """
+        /*var query = """
                 SELECT AVG(glucose)
                 FROM health_data
                 WHERE id IN (%s)
                 """.formatted(idsStr);
         var avg = hibernate.sql(query, Float.class).get(0);
+                */
+
+        var sumQuery = """
+            SELECT SUM(MIN(MAX(glucose, %d), %d))
+            FROM health_data
+            WHERE id IN (%s)
+            """.formatted(lower, upper, idsStr);
+        var countQuery = """
+            SELECT COUNT(glucose)
+            FROM health_data
+            WHERE id IN (%s)
+            """.formatted(idsStr);
+        Float sum = hibernate.sql(sumQuery, Float.class).get(0);
+        Integer count = hibernate.sql(countQuery, Integer.class).get(0);
+        if (sum == null || count == null) {
+            sum = 0f;
+            count = 0;
+        }
+
+        double halfCost = privacyCost / 2.0;
+        double sumSensitivity = Math.max(Math.abs(lower), Math.abs(upper));
+        double noisySum = sum + laplaceNoise(sumSensitivity / halfCost);
+        double noisyCount = Math.max(1.0, count + laplaceNoise(1.0 / halfCost));
+
+        double avg = Math.min(Math.max(noisySum / noisyCount, lower), upper);
         var res = new DPResult();
-        res.setResultValue(avg);
+        res.setResultType(DPResult.ResultType.AVERAGE);
+        res.setResultValue((float) avg);
+
+        res.setClippingLower((float) lower);
+        res.setClippingUpper((float) upper);
 
         res.setResultCode(DPResult.ResultCode.SUCCESS);
         res.setPrivacyBudget(privacyBudget);
