@@ -2,3 +2,14 @@
 
 # XACML (Lab 1)
 xacml.policy.file=ci_policies.xml
+
+# Differential Privacy (Project)
+#query price
+dp.epsilon=0.5
+
+#total budget, passed to difprivtool constructor
+dp.privacy.budget=5.0
+
+#clipping limits
+dp.glucose.lower=0
+dp.glucose.upper=400

@@ -2,10 +2,17 @@ package pt.unl.fct.di.syspriv.dp;
 
 import pt.unl.fct.di.syspriv.entities.DPResult;
 import pt.unl.fct.di.syspriv.storage.Hibernate;
+import pt.unl.fct.di.syspriv.util.ConfigLoader;
 
 import java.util.List;
+import java.util.Random;
 
 public class DifferentialPrivacyTool {
+
+    private final int lower = ConfigLoader.getIntProperty("dp.glucose.lower", 0);
+    private final int upper = ConfigLoader.getIntProperty("dp.glucose.upper", 400);
+    private static final Random RANDOM = new Random();
+
 
     private float privacyBudget;
 
@@ -46,6 +53,10 @@ public class DifferentialPrivacyTool {
 
     // TODO Right now this method does not provide Differential Privacy. Change it
     public DPResult countBelowGlucose(float privacyCost, int upperGlucose) {
+        if (!spendBudget(privacyCost)) {
+            return failResult();
+        }
+
         var query = """
                 SELECT COUNT(*)
                 FROM health_data
@@ -53,13 +64,25 @@ public class DifferentialPrivacyTool {
                 AND id IN (%s)
                 """.formatted(upperGlucose, idsStr);
         var count = hibernate.sql(query, Integer.class).get(0);
+
+        double sensitivity = 1.0;
+        double noisy = count + laplaceNoise(sensitivity / privacyCost);
+
+
         var res = new DPResult();
         res.setResultValue(count);
+
+        res.setResultCode(DPResult.ResultCode.SUCCESS);
+        res.setPrivacyBudget(privacyBudget);
         return res;
     }
 
     // TODO Right now this method does not provide Differential Privacy. Change it
     public DPResult sumGlucoseValues(float privacyCost) {
+        if (!spendBudget(privacyCost)) {
+            return failResult();
+        }
+
         var query = """
                 SELECT SUM(glucose)
                 FROM health_data
@@ -68,6 +91,9 @@ public class DifferentialPrivacyTool {
         var sum = hibernate.sql(query, Float.class).get(0);
         var res = new DPResult();
         res.setResultValue(sum);
+
+        res.setResultCode(DPResult.ResultCode.SUCCESS);
+        res.setPrivacyBudget(privacyBudget);
         return res;
     }
 
@@ -76,6 +102,10 @@ public class DifferentialPrivacyTool {
      *  Hint: It may help to consider that the average of a collection is: avg(col) = sum(col) / len(col)
      */
     public DPResult averageGlucoseValues(float privacyCost) {
+        if (!spendBudget(privacyCost)) {
+            return failResult();
+        }
+
         var query = """
                 SELECT AVG(glucose)
                 FROM health_data
@@ -84,6 +114,9 @@ public class DifferentialPrivacyTool {
         var avg = hibernate.sql(query, Float.class).get(0);
         var res = new DPResult();
         res.setResultValue(avg);
+
+        res.setResultCode(DPResult.ResultCode.SUCCESS);
+        res.setPrivacyBudget(privacyBudget);
         return res;
     }
 
@@ -102,4 +135,27 @@ public class DifferentialPrivacyTool {
         return recordIds.size();
     }
 
+    /* ---- LaPlace ----*/
+    private double laplaceNoise(double scale) {
+        double u;
+        do {
+            u = RANDOM.nextDouble() - 0.5;
+        } while (u == -0.5);
+        return -scale * Math.signum(u) * Math.log(1 - 2 * Math.abs(u));
+    }
+
+    private boolean spendBudget(float cost) {
+        if (cost <= 0 || cost > privacyBudget) {
+            return false;
+        }
+        privacyBudget -= cost;
+        return true;
+    }
+
+    private DPResult failResult() {
+        var res = new DPResult();
+        res.setResultCode(DPResult.ResultCode.FAIL);
+        res.setPrivacyBudget(privacyBudget);
+        return res;
+    }
 }
