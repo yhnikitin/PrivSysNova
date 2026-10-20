@@ -39,7 +39,13 @@ public class DPResult {
 
     public DPResult() {}
 
-    public DPResult(float result, float sensitivity, float clippingLower, float clippingUpper) { }
+    public DPResult(float result, float sensitivity, float clippingLower, float clippingUpper) {
+        //used for testing??
+        this.resultValue = result;
+        this.querySensitivity = sensitivity;
+        this.clippingLower = clippingLower;
+        this.clippingUpper = clippingUpper;
+    }
 
     // Getters and Setters
     /**
@@ -209,7 +215,7 @@ public class DPResult {
     @Override
     public String toString() {
         return "DPResult{" +
-                "type=" + resultType.name() +
+                "type=" + (resultType != null ? resultType.name() : "NULL") +
                 ", code='" + resultCode.getCode() +
                 ", privacyBudget='" + Float.toString(privacyBudget) + '\'' +
                 ", sensitivity='" + Float.toString(querySensitivity) +'\'' +
