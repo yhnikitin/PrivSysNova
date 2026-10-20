@@ -159,9 +159,9 @@ public class DPResult {
     }
 
     public String getHistogramResultString()
-    {
-        // TODO
-        return "-1";
+    {// Not sure if this is all
+        if (resultCode == ResultCode.FAIL || histogramResultValue == null) return "-1";
+        return histogramResultValue.toString();
     }
     
     /**
