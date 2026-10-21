@@ -3,6 +3,8 @@ package pt.unl.fct.di.syspriv.xacml;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -143,5 +145,63 @@ class GdprPolicyTest {
         save(p);
         HealthData hd = newHealthData(p);
         assertTrue(pdp.checkAccessGDPR(itAdmin, hd, "read", BASIS, "Emergency"));
+    }
+
+    @Test
+    void patientCanAccessOwnedAppointmentAndPayment() throws Exception {
+        Patient patient = save(newPatient("T9"));
+        Appointment appointment = new Appointment(LocalDate.now(), doctor, patient);
+        Hibernate.getInstance().persist(appointment);
+        Payment payment = new Payment(LocalDate.now(), patient, 25.0f, appointment, "4111111111111111");
+        Hibernate.getInstance().persist(payment);
+
+        assertTrue(pdp.checkAccessGDPR(patient, appointment, "read", BASIS, "Appointment"));
+        assertTrue(pdp.checkAccessGDPR(patient, payment, "read", BASIS, "Billing and Payments"));
+    }
+
+    @Test
+    void employeeCanAccessOwnedAppointment() throws Exception {
+        Patient patient = save(new Patient("T10", "1990-01-01 00:00:00", "TestInsurance", "Rua Teste", dpo));
+        Appointment appointment = new Appointment(LocalDate.now(), doctor, patient);
+        Hibernate.getInstance().persist(appointment);
+
+        assertTrue(pdp.checkAccessGDPR(doctor, appointment, "read", BASIS, "Appointment"));
+    }
+
+    @Test
+    void clinicianCanAccessOwnPatientOutsideEmergency() throws Exception {
+        Patient patient = save(newPatient("T11"));
+
+        assertTrue(pdp.checkAccessGDPR(doctor, patient, "read", BASIS, "Appointment"));
+    }
+
+    @Test
+    void unrelatedPatientCannotAccessAppointmentOrPatientRecord() throws Exception {
+        Patient owner = save(newPatient("T12"));
+        Patient unrelated = save(new Patient("T13", "1990-01-01 00:00:00", "TestInsurance", "Other St", dpo));
+        Appointment appointment = new Appointment(LocalDate.now(), doctor, owner);
+        Hibernate.getInstance().persist(appointment);
+
+        assertFalse(pdp.checkAccessGDPR(unrelated, owner, "read", BASIS, "Appointment"));
+        assertFalse(pdp.checkAccessGDPR(unrelated, appointment, "read", BASIS, "Appointment"));
+    }
+
+    @Test
+    void healthDataRetentionFollowsPatientRetentionDate() throws Exception {
+        Patient activePatient = newPatient("T14");
+        addConsent(activePatient, "research", true, null);
+        save(activePatient);
+        HealthData activeHealthData = new HealthData(activePatient.getId(), 110, new Date());
+        Hibernate.getInstance().persist(activeHealthData);
+
+        Patient expiredPatient = newPatient("T15");
+        expiredPatient.setRetentionUntil(LocalDateTime.now().minusDays(1));
+        addConsent(expiredPatient, "research", true, null);
+        save(expiredPatient);
+        HealthData expiredHealthData = new HealthData(expiredPatient.getId(), 115, new Date());
+        Hibernate.getInstance().persist(expiredHealthData);
+
+        assertTrue(pdp.checkAccessGDPR(itAdmin, activeHealthData, "read", BASIS, "Emergency"));
+        assertFalse(pdp.checkAccessGDPR(itAdmin, expiredHealthData, "read", BASIS, "Emergency"));
     }
 }

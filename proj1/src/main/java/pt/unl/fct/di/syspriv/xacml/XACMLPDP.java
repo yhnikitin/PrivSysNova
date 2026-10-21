@@ -90,6 +90,7 @@ public class XACMLPDP {
         resourceAttrs.put("id", String.valueOf(getResourceId(resource)));
         resourceAttrs.put("resource-type", resourceType);
         resourceAttrs.put("data-category", isHealthData(resource) ? "health-data" : "personal-data");
+        addOwnershipAttributes(resource, resourceAttrs);
         subjectAttrs.put("retention-expired", Boolean.toString(isRetentionExpired(resource)));
 
         if (resource instanceof Patient p && p.getPrimaryDoctor() != null) {
@@ -187,8 +188,68 @@ public class XACMLPDP {
             if (!payments.isEmpty() && payments.get(0).getPatient() != null) {
                 retentionUntil = payments.get(0).getPatient().getRetentionUntil();
             }
+        } else if (resource instanceof HealthData healthData) {
+            Patient patient = Hibernate.getInstance().get(Patient.class, healthData.getPatientId());
+            retentionUntil = patient == null ? null : patient.getRetentionUntil();
         }
         return isExpired(retentionUntil);
+    }
+
+    private void addOwnershipAttributes(Object resource, Map<String, String> resourceAttrs) {
+        if (resource instanceof Employee employee) {
+            resourceAttrs.put("employee-owner-id", String.valueOf(employee.getId()));
+        } else if (resource instanceof Patient patient) {
+            resourceAttrs.put("patient-owner-id", String.valueOf(patient.getId()));
+            if (patient.getPrimaryDoctor() != null) {
+                resourceAttrs.put("doctorId", String.valueOf(patient.getPrimaryDoctor().getId()));
+            }
+        } else if (resource instanceof Appointment appointment) {
+            List<Appointment> records = Hibernate.getInstance().jpql(
+                    "FROM Appointment a LEFT JOIN FETCH a.patient p LEFT JOIN FETCH p.primaryDoctor "
+                            + "LEFT JOIN FETCH a.employee WHERE a.id = " + appointment.getId(),
+                    Appointment.class);
+            if (!records.isEmpty()) {
+                Appointment loaded = records.get(0);
+                if (loaded.getPatient() != null) {
+                    resourceAttrs.put("patient-owner-id", String.valueOf(loaded.getPatient().getId()));
+                    if (loaded.getPatient().getPrimaryDoctor() != null) {
+                        resourceAttrs.put("doctorId",
+                                String.valueOf(loaded.getPatient().getPrimaryDoctor().getId()));
+                    }
+                }
+                if (loaded.getEmployee() != null) {
+                    resourceAttrs.put("employee-owner-id", String.valueOf(loaded.getEmployee().getId()));
+                }
+            }
+        } else if (resource instanceof Payment payment) {
+            List<Payment> records = Hibernate.getInstance().jpql(
+                    "FROM Payment p LEFT JOIN FETCH p.patient LEFT JOIN FETCH p.appointment a "
+                            + "LEFT JOIN FETCH a.employee WHERE p.id = " + payment.getId(),
+                    Payment.class);
+            if (!records.isEmpty()) {
+                Payment loaded = records.get(0);
+                if (loaded.getPatient() != null) {
+                    resourceAttrs.put("patient-owner-id", String.valueOf(loaded.getPatient().getId()));
+                }
+                if (loaded.getAppointment() != null && loaded.getAppointment().getEmployee() != null) {
+                    resourceAttrs.put("employee-owner-id",
+                            String.valueOf(loaded.getAppointment().getEmployee().getId()));
+                }
+            }
+        } else if (resource instanceof HealthData healthData) {
+            resourceAttrs.put("patient-owner-id", String.valueOf(healthData.getPatientId()));
+            Patient patient = Hibernate.getInstance().get(Patient.class, healthData.getPatientId());
+            if (patient != null && patient.getPrimaryDoctor() != null) {
+                resourceAttrs.put("doctorId", String.valueOf(patient.getPrimaryDoctor().getId()));
+            }
+        } else if (resource instanceof ConsentRecord || resource instanceof GdprRequest) {
+            Object owner = getOwner(resource);
+            if (owner instanceof Employee employee) {
+                resourceAttrs.put("employee-owner-id", String.valueOf(employee.getId()));
+            } else if (owner instanceof Patient patient) {
+                resourceAttrs.put("patient-owner-id", String.valueOf(patient.getId()));
+            }
+        }
     }
 
     private boolean isExpired(LocalDateTime retentionUntil) {

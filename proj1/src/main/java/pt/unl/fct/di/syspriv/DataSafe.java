@@ -270,8 +270,9 @@ public class DataSafe {
         try {
             String exportJson = new GDPRHandler(hibernate, loggedInPerson, lawfulBasis).handleRequest(requestType, pdp);
             if ("ACCESS".equals(requestType)) {
-                System.out.println("File exported as export.json");
                 java.nio.file.Files.writeString(java.nio.file.Path.of("export.json"), exportJson);
+                System.out.println(exportJson);
+                System.out.println("File exported as export.json");
             } else {
                 System.out.println("GDPR erasure request completed.");
             }

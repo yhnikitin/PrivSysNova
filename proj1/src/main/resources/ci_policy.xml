@@ -235,7 +235,7 @@
                                             AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
                                             MustBePresent="false"/>
                         <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-                                            AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                            AttributeId="patient-owner-id" DataType="http://www.w3.org/2001/XMLSchema#string"
                                             MustBePresent="false"/>
                     </Apply>
                 </Condition>
@@ -310,7 +310,7 @@
                                             AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
                                             MustBePresent="false"/>
                         <AttributeDesignator Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-                                            AttributeId="id" DataType="http://www.w3.org/2001/XMLSchema#string"
+                                            AttributeId="employee-owner-id" DataType="http://www.w3.org/2001/XMLSchema#string"
                                             MustBePresent="false"/>
                     </Apply>
                 </Condition>
