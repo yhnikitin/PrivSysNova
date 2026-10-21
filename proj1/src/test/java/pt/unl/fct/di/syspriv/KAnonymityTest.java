@@ -77,6 +77,59 @@ class KAnonymityTest {
             assertTrue(tool.isTClose(group, result));
     }
 
+    @Test
+    void runTCloseMondrianTriesNextQiWhenLargestRangeCannotSplit() {
+        var tool = new KAnonymityTool<SplitTestRecord>(2, 0.2f);
+        List<SplitTestRecord> data = List.of(
+                new SplitTestRecord(0, 0, 0),
+                new SplitTestRecord(0, 0, 0),
+                new SplitTestRecord(0, 0, 1),
+                new SplitTestRecord(0, 1, 0),
+                new SplitTestRecord(0, 1, 1),
+                new SplitTestRecord(10, 1, 1));
+
+        List<SplitTestRecord> result = tool.runTCloseMondrain(data);
+
+        assertEquals(data.size(), result.size());
+        assertTrue(tool.isKAnonymous(result));
+        var groups = result.stream().collect(Collectors.groupingBy(SplitTestRecord::getQuasiIdentifiers));
+        assertEquals(2, groups.size());
+        for (var group : groups.values()) {
+            assertTrue(tool.isTClose(group, result));
+        }
+    }
+
+    private static final class SplitTestRecord implements pt.unl.fct.di.syspriv.entities.Anonymizable {
+        private double widestQi;
+        private double fallbackQi;
+        private final double sensitiveValue;
+
+        private SplitTestRecord(double widestQi, double fallbackQi, double sensitiveValue) {
+            this.widestQi = widestQi;
+            this.fallbackQi = fallbackQi;
+            this.sensitiveValue = sensitiveValue;
+        }
+
+        @Override
+        public Map<String, Object> getQuasiIdentifiers() {
+            Map<String, Object> values = new LinkedHashMap<>();
+            values.put("widestQi", widestQi);
+            values.put("fallbackQi", fallbackQi);
+            return values;
+        }
+
+        @Override
+        public void setQuasiIdentifiers(Map<String, Object> values) {
+            widestQi = ((Number) values.get("widestQi")).doubleValue();
+            fallbackQi = ((Number) values.get("fallbackQi")).doubleValue();
+        }
+
+        @Override
+        public Object getSensitiveValue() {
+            return sensitiveValue;
+        }
+    }
+
     // --- auxiliares ---
     private static AnonymousHealthData rec(long id, int birthYear, String address, int glucose) {
         Date date = Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant());

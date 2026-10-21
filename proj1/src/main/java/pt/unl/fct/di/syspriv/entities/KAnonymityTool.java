@@ -116,28 +116,32 @@ public class KAnonymityTool<T extends Anonymizable> {
     }
 
     private void splitPartition(List<T> currentPartition, List<T> originalRecords, List<List<T>> partitions, boolean enforceTCloseness) {
-        if (currentPartition.size() < k) {
-            return;
-        }
-
-        String attributeToSplit = findAttributeWithLargestRange(currentPartition);
-        if (attributeToSplit == null) {
+        if (currentPartition.size() < 2 * k) {
             partitions.add(currentPartition);
             return;
         }
 
-        currentPartition.sort(Comparator.comparingDouble(record -> ((Number) record.getQuasiIdentifiers().get(attributeToSplit)).doubleValue()));
-
-        int splitIndex = findValidSplit(currentPartition, attributeToSplit, originalRecords, enforceTCloseness);
-        if (splitIndex < 0) {
+        List<String> sortedAttributes = findAttributesByLargestRange(currentPartition);
+        if (sortedAttributes.isEmpty()) {
             partitions.add(currentPartition);
             return;
         }
 
-        List<T> leftPartition = new ArrayList<>(currentPartition.subList(0, splitIndex));
-        List<T> rightPartition = new ArrayList<>(currentPartition.subList(splitIndex, currentPartition.size()));
-        splitPartition(leftPartition, originalRecords, partitions, enforceTCloseness);
-        splitPartition(rightPartition, originalRecords, partitions, enforceTCloseness);
+        for (String attributeToSplit : sortedAttributes) {
+            currentPartition.sort(Comparator.comparingDouble(record ->
+                    ((Number) record.getQuasiIdentifiers().get(attributeToSplit)).doubleValue()));
+
+            int splitIndex = findValidSplit(currentPartition, attributeToSplit, originalRecords, enforceTCloseness);
+            if (splitIndex >= 0) {
+                List<T> leftPartition = new ArrayList<>(currentPartition.subList(0, splitIndex));
+                List<T> rightPartition = new ArrayList<>(currentPartition.subList(splitIndex, currentPartition.size()));
+                splitPartition(leftPartition, originalRecords, partitions, enforceTCloseness);
+                splitPartition(rightPartition, originalRecords, partitions, enforceTCloseness);
+                return;
+            }
+        }
+
+        partitions.add(currentPartition);
     }
 
     // Searches for a valid index to split the partition.
@@ -186,8 +190,8 @@ public class KAnonymityTool<T extends Anonymizable> {
         return isTClose(leftHalf, originalRecords) && isTClose(rightHalf, originalRecords);
     }
 
-    private String findAttributeWithLargestRange(List<T> records) {
-        Map<String, List<Float>> attributeRanges = new HashMap<>();
+    private List<String> findAttributesByLargestRange(List<T> records) {
+        Map<String, List<Double>> attributeRanges = new HashMap<>();
 
         for (T record : records) {
             Map<String, Object> qiValues = record.getQuasiIdentifiers();
@@ -196,11 +200,11 @@ public class KAnonymityTool<T extends Anonymizable> {
                 Object value = entry.getValue();
 
                 if (value instanceof Number) {
-                    float numericValue = ((Number) value).floatValue();
+                    double numericValue = ((Number) value).doubleValue();
                     if(!attributeRanges.containsKey(attribute)) {
                         attributeRanges.put(attribute, new ArrayList<>(List.of(numericValue, numericValue)));
                     }
-                    List<Float> range = attributeRanges.get(attribute);
+                    List<Double> range = attributeRanges.get(attribute);
                     if(numericValue < range.get(0)) {
                         range.set(0, numericValue);
                     } else if(numericValue > range.get(1)) {
@@ -210,18 +214,11 @@ public class KAnonymityTool<T extends Anonymizable> {
             }
         }
 
-        String attributeWithLargestRange = null;
-        float largestRange = -1;
-        for (Map.Entry<String, List<Float>> entry : attributeRanges.entrySet()) {
-            String attribute = entry.getKey();
-            List<Float> range = entry.getValue();
-            float currentRange = range.get(1) - range.get(0);
-            if (currentRange > largestRange) {
-                largestRange = currentRange;
-                attributeWithLargestRange = attribute;
-            }
-        }
-        return attributeWithLargestRange;
+        return attributeRanges.entrySet().stream()
+            .sorted(Comparator.<Map.Entry<String, List<Double>>>comparingDouble(
+                entry -> entry.getValue().get(1) - entry.getValue().get(0)).reversed())
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     private void anonymizePartition(List<T> partition) {
