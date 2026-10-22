@@ -1,8 +1,10 @@
 package pt.unl.fct.di.syspriv;
 
 import pt.unl.fct.di.syspriv.entities.*;
+import pt.unl.fct.di.syspriv.dp.DifferentialPrivacyTool;
 import pt.unl.fct.di.syspriv.gdpr.GDPRHandler;
 import pt.unl.fct.di.syspriv.storage.Hibernate;
+import pt.unl.fct.di.syspriv.util.ConfigLoader;
 import pt.unl.fct.di.syspriv.xacml.XACMLPDP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,14 +52,16 @@ public class DataSafe {
         while (running) {
 
             System.out.println("\n=== What would you like to do? ===");
-            System.out.println("1. View hospital data\n2. My data rights (GDPR request)\n3. Exit");
+            System.out.println("1. View hospital data\n2. My data rights (GDPR request)\n"
+                    + "3. Differential privacy queries\n4. Exit");
             System.out.print("Select an option: ");
 
             int option = readInt(scanner);
             switch (option) {
                 case 1 -> handleDataAccessMenu(scanner);
                 case 2 -> handleGdprRequestMenu(scanner);
-                case 3 -> {
+                case 3 -> handleDifferentialPrivacyMenu(scanner);
+                case 4 -> {
                     System.out.println("Exiting...");
                     running = false;
                 }
@@ -279,6 +283,63 @@ public class DataSafe {
         } catch (Exception e) {
             logger.error("Could not complete GDPR " + requestType + " request: " + e.getMessage(), e);
             System.out.println("Could not complete the GDPR request.");
+        }
+    }
+
+    private void handleDifferentialPrivacyMenu(Scanner scanner) {
+        String context = promptContext(scanner);
+        if (context == null) {
+            System.out.println("Invalid context. Query cancelled.");
+            return;
+        }
+        String lawfulBasis = promptLawfulBasis(scanner);
+        if (lawfulBasis == null) {
+            System.out.println("A lawful basis is required. Query cancelled.");
+            return;
+        }
+
+        try {
+            List<HealthData> healthData = hibernate.jpql("FROM HealthData", HealthData.class);
+            List<Long> authorizedIds = new java.util.ArrayList<>();
+            for (HealthData record : healthData) {
+                if (pdp.checkAccessGDPR(loggedInPerson, record, "read", lawfulBasis, context)) {
+                    authorizedIds.add(record.getId());
+                }
+            }
+
+            if (authorizedIds.isEmpty()) {
+                System.out.println("Access denied or no health records are authorized for research.");
+                return;
+            }
+
+            float epsilon = (float) ConfigLoader.getDoubleProperty("dp.epsilon", 0.5);
+            float initialBudget = (float) ConfigLoader.getDoubleProperty("dp.privacy.budget", 5.0);
+            DifferentialPrivacyTool dp = new DifferentialPrivacyTool(initialBudget, authorizedIds, "health_data");
+            System.out.println("\n=== Differential Privacy Query ===");
+            System.out.println("1. Count below glucose threshold\n2. Sum glucose\n3. Average glucose\n"
+                    + "4. Grouped glucose counts");
+            System.out.print("Select query: ");
+            int queryChoice = readInt(scanner);
+
+            DPResult result = switch (queryChoice) {
+                case 1 -> {
+                    System.out.print("Glucose threshold: ");
+                    int threshold = readInt(scanner);
+                    yield dp.countBelowGlucose(epsilon, threshold);
+                }
+                case 2 -> dp.sumGlucoseValues(epsilon);
+                case 3 -> dp.averageGlucoseValues(epsilon);
+                case 4 -> dp.glucoseHistogram(epsilon);
+                default -> null;
+            };
+            if (result == null) {
+                System.out.println("Invalid query selection.");
+                return;
+            }
+            System.out.println(result);
+        } catch (Exception exception) {
+            logger.error("Differential privacy query failed", exception);
+            System.out.println("Could not run the differential privacy query.");
         }
     }
 
